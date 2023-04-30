@@ -34,7 +34,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release for ${{ github.ref }}
           body: |
-            This is an auto-generated release created by GitHub Actions for Linux.
+            This is an auto-generated release created by GitHub Actions for Linux / MacOS / Windows.
           draft: false
           prerelease: false
         env:
