@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "rebis-grade-excel-importer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"CE204.xlsx\" \"ExcelNotGirisTaslak4-30-2023.xls\" \"E-Posta\" \"Not\" \"Not\" ",
+      "workingDirectory": "C:\\Users\\ugur.coruh\\Desktop\\rebis\\rebis-grade-excel-importer",
+      "nativeDebugging": true
+    }
+  }
+}

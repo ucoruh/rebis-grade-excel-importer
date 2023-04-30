@@ -1,0 +1,80 @@
+name: .NET Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build for Linux
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -o publish/linux
+
+      - name: Build for macOS
+        run: dotnet publish -c Release -r osx-x64 --self-contained true -o publish/macos
+
+      - name: Build for Windows
+        run: dotnet publish -c Release -r win-x64 --self-contained true -o publish/windows
+
+      - name: Create release
+        id: create_common_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release for ${{ github.ref }}
+          body: |
+            This is an auto-generated release created by GitHub Actions for Linux.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
+
+      - name: Compress Linux artifacts
+        run: tar -czvf linux-artifacts.tar.gz -C publish/linux .
+
+      - name: Compress macOS artifacts
+        run: tar -czvf macos-artifacts.tar.gz -C publish/macos .
+
+      - name: Compress Windows artifacts
+        run: tar -czvf windows-artifacts.tar.gz -C publish/windows .
+
+      - name: Upload Linux release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_common_release.outputs.upload_url }}
+          asset_path: ./linux-artifacts.tar.gz
+          asset_name: linux-artifacts.tar.gz
+          asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
+
+      - name: Upload macOS release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_common_release.outputs.upload_url }}
+          asset_path: ./macos-artifacts.tar.gz
+          asset_name: macos-artifacts.tar.gz
+          asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
+
+      - name: Upload Windows release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_common_release.outputs.upload_url }}
+          asset_path: ./windows-artifacts.tar.gz
+          asset_name: windows-artifacts.tar.gz
+          asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
