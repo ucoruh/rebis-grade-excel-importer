@@ -9,7 +9,7 @@ namespace ExcelApp
         static void Main(string[] args)
         {
             // Check if the user provided the correct number of arguments
-            if (args.Length != 6)
+            if (args.Length != 7)
             {
                 Console.WriteLine("Please provide five arguments: first file path, second file path, reference column name, source column name, destination column name, first file sheet index, second file sheet index");
                 return;
