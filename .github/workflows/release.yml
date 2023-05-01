@@ -1,10 +1,10 @@
-name: .NET Release
+name: .NET Windows MacOS Linux Release
 
 on:
   push:
     tags:
       - 'v*'
-
+      
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,21 +40,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
 
-      - name: Compress Linux artifacts
-        run: tar -czvf linux-artifacts.tar.gz -C publish/linux .
+      - name: Compress Linux binaries
+        run: tar -czvf linux-binaries.tar.gz -C publish/linux .
 
-      - name: Compress macOS artifacts
-        run: tar -czvf macos-artifacts.tar.gz -C publish/macos .
+      - name: Compress macOS binaries
+        run: tar -czvf macos-binaries.tar.gz -C publish/macos .
 
-      - name: Compress Windows artifacts
-        run: tar -czvf windows-artifacts.tar.gz -C publish/windows .
+      - name: Compress Windows binaries
+        run: tar -czvf windows-binaries.tar.gz -C publish/windows .
 
       - name: Upload Linux release asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_common_release.outputs.upload_url }}
-          asset_path: ./linux-artifacts.tar.gz
-          asset_name: linux-artifacts.tar.gz
+          asset_path: ./linux-binaries.tar.gz
+          asset_name: linux-binaries.tar.gz
           asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
@@ -63,8 +63,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_common_release.outputs.upload_url }}
-          asset_path: ./macos-artifacts.tar.gz
-          asset_name: macos-artifacts.tar.gz
+          asset_path: ./macos-binaries.tar.gz
+          asset_name: macos-binaries.tar.gz
           asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}
@@ -73,8 +73,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_common_release.outputs.upload_url }}
-          asset_path: ./windows-artifacts.tar.gz
-          asset_name: windows-artifacts.tar.gz
+          asset_path: ./windows-binaries.tar.gz
+          asset_name: windows-binaries.tar.gz
           asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.REBIS_TOKEN }}

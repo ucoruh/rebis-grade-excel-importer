@@ -1,6 +1,7 @@
 ﻿using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using NPOI.XWPF.UserModel;
 
 namespace ExcelApp
 {
@@ -47,14 +48,22 @@ namespace ExcelApp
                 return;
             }
 
+
             ISheet firstWorksheet = firstWorkbook.GetSheetAt(firstFileSheetIndex);
 
             // Find the column index of the reference column in the first file
-            int referenceColumnIndex = 0;
+            int referenceColumnIndex = -1;
             IRow firstHeaderRow = firstWorksheet.GetRow(0);
             for (int i = 0; i < firstHeaderRow.LastCellNum; i++)
             {
-                ICell cell = firstHeaderRow.GetCell(i);
+                NPOI.SS.UserModel.ICell cell = firstHeaderRow.GetCell(i);
+
+                if (cell.CellType == CellType.Numeric)
+                {
+                    Console.WriteLine("Numeric Header Detected Row:["+cell.RowIndex+"] Column:["+cell.ColumnIndex+"], Skipping in " + firstFilePath + " file");
+                    continue;
+                }
+                    
                 if (cell.StringCellValue.ToLower() == referenceColumn.ToLower())
                 {
                     referenceColumnIndex = cell.ColumnIndex;
@@ -62,16 +71,37 @@ namespace ExcelApp
                 }
             }
 
+            if(referenceColumnIndex== -1)
+            {
+                Console.WriteLine("Reference Column [" + referenceColumn + "] value not found in "+ firstFilePath + " file.");
+                Console.WriteLine("Please Check column names if its not exist create it");
+                return;
+            }
+
             // Find the column index of the source column in the first file
-            int sourceColumnIndex = 0;
+            int sourceColumnIndex = -1;
             for (int i = 0; i < firstHeaderRow.LastCellNum; i++)
             {
-                ICell cell = firstHeaderRow.GetCell(i);
+                NPOI.SS.UserModel.ICell cell = firstHeaderRow.GetCell(i);
+
+                if (cell.CellType == CellType.Numeric)
+                {
+                    Console.WriteLine("Numeric Header Detected Row:[" + cell.RowIndex + "] Column:[" + cell.ColumnIndex + "], Skipping in " + firstFilePath + " file");
+                    continue;
+                }
+
                 if (cell.StringCellValue.ToLower() == sourceColumn.ToLower())
                 {
                     sourceColumnIndex = cell.ColumnIndex;
                     break;
                 }
+            }
+
+            if (sourceColumnIndex == -1)
+            {
+                Console.WriteLine("Reference Column [" + sourceColumn + "] value not found in " + firstFilePath + " file.");
+                Console.WriteLine("Please Check column names if its not exist create it");
+                return;
             }
 
             // Load the second Excel file into memory
@@ -99,11 +129,18 @@ namespace ExcelApp
             ISheet secondWorksheet = secondWorkbook.GetSheetAt(secondFileSheetIndex);
 
             // Find the column index of the reference column in the second file
-            int secondReferenceColumnIndex = 0;
+            int secondReferenceColumnIndex = -1;
             IRow secondHeaderRow = secondWorksheet.GetRow(0);
             for (int i = 0; i < secondHeaderRow.LastCellNum; i++)
             {
-                ICell cell = secondHeaderRow.GetCell(i);
+                NPOI.SS.UserModel.ICell cell = secondHeaderRow.GetCell(i);
+
+                if (cell.CellType == CellType.Numeric)
+                {
+                    Console.WriteLine("Numeric Header Detected Row:[" + cell.RowIndex + "] Column:[" + cell.ColumnIndex + "], Skipping in " + secondFilePath + " file");
+                    continue;
+                }
+
                 if (cell.StringCellValue.ToLower() == referenceColumn.ToLower())
                 {
                     secondReferenceColumnIndex = cell.ColumnIndex;
@@ -111,11 +148,27 @@ namespace ExcelApp
                 }
             }
 
+            if (secondReferenceColumnIndex == -1)
+            {
+                Console.WriteLine("Reference Column [" + referenceColumn + "] value not found in " + secondFilePath + " file.");
+                Console.WriteLine("Please Check column names if its not exist create it");
+                return;
+            }
+
+
+
             // Find the column index of the destination column in the second file
-            int destinationColumnIndex = 0;
+            int destinationColumnIndex = -1;
             for (int i = 0; i < secondHeaderRow.LastCellNum; i++)
             {
-                ICell cell = secondHeaderRow.GetCell(i);
+                NPOI.SS.UserModel.ICell cell = secondHeaderRow.GetCell(i);
+
+                if (cell.CellType == CellType.Numeric)
+                {
+                    Console.WriteLine("Numeric Header Detected Row:[" + cell.RowIndex + "] Column:[" + cell.ColumnIndex + "], Skipping in " + secondFilePath + " file");
+                    continue;
+                }
+
                 if (cell.StringCellValue.ToLower() == destinationColumn.ToLower())
                 {
                     destinationColumnIndex = cell.ColumnIndex;
@@ -123,51 +176,115 @@ namespace ExcelApp
                 }
             }
 
+            if (destinationColumnIndex == -1)
+            {
+                Console.WriteLine("Reference Column [" + destinationColumn + "] value not found in " + secondFilePath + " file.");
+                Console.WriteLine("Please Check column names if its not exist create it");
+                return;
+            }
+
             // Loop through each row in the second file and copy the source column value to the destination column if the reference column value matches
             for (int i = 1; i <= secondWorksheet.LastRowNum; i++)
             {
                 IRow row = secondWorksheet.GetRow(i);
-                ICell referenceCell = row.GetCell(secondReferenceColumnIndex);
+                NPOI.SS.UserModel.ICell referenceCell = row.GetCell(secondReferenceColumnIndex);
+
+                if (referenceCell == null)
+                {
+                    continue;
+                }
+                
                 string referenceValue = referenceCell.StringCellValue.Trim();
 
                 // Loop through each row in the first file to find the matching reference value
                 for (int j = 1; j <= firstWorksheet.LastRowNum; j++)
                 {
                     IRow firstRow = firstWorksheet.GetRow(j);
-                    ICell firstReferenceCell = firstRow.GetCell(referenceColumnIndex);
+                    NPOI.SS.UserModel.ICell firstReferenceCell = firstRow.GetCell(referenceColumnIndex);
+
+                    if(firstReferenceCell==null)
+                    {
+                        Console.WriteLine( "Cell is Null Row["+j+"]Column["+referenceColumnIndex+"] Skipping in " + firstFilePath + " file.");
+                        continue;
+                    }
+
                     string firstReferenceValue = firstReferenceCell.StringCellValue.Trim();
 
                     // If the reference values match, copy the source column value to the destination column in the second file
                     if (referenceValue.Equals(firstReferenceValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        ICell sourceCell = firstRow.GetCell(sourceColumnIndex);
-                        ICell destinationCell = row.GetCell(destinationColumnIndex);
+                        NPOI.SS.UserModel.ICell sourceCell = firstRow.GetCell(sourceColumnIndex);
+                        NPOI.SS.UserModel.ICell destinationCell = row.GetCell(destinationColumnIndex);
 
-                        if (destinationCell.CellType == CellType.Numeric)
+                        if(sourceCell == null)
+                        {
+                            Console.WriteLine("Source Cell is Null Row[" + j + "]Column[" + sourceColumnIndex + "] Skipping in " + firstFilePath + " file.");
+                            continue;
+                        }
+
+                        if(destinationCell == null)
+                        {
+                            Console.WriteLine("Destination Cell is Null Row[" + j + "]Column[" + destinationColumnIndex + "] Creating in " + secondFilePath + " file.");
+                            destinationCell = row.CreateCell(destinationColumnIndex);
+                            destinationCell.SetCellValue(0);
+                        }
+
+                        if (sourceCell.CellType == CellType.Formula) // check if the cell contains a formula
+                        {
+                            sourceCell.SetCellType(CellType.Numeric); // set the cell type to Formula
+
+                            try
+                            {
+                                double numericValue = sourceCell.NumericCellValue;
+                                destinationCell.SetCellValue(numericValue);
+                            }
+                            catch
+                            {
+                                destinationCell.SetCellValue(0);
+                            }
+
+                        }
+                        else if (sourceCell.CellType == CellType.Numeric)
                         {
                             // Destination cell already contains a numeric value
-                            double numericValue = sourceCell.NumericCellValue;
-                            destinationCell.SetCellValue(numericValue);
+                            try
+                            {
+                                double numericValue = sourceCell.NumericCellValue;
+                                destinationCell.SetCellValue(numericValue);
+                            }
+                            catch
+                            {
+                                destinationCell.SetCellValue(0);
+                            }
+
                         }
                         else if (destinationCell.CellType == CellType.String)
                         {
                             // Destination cell already contains a string value
-                            string stringValue = sourceCell.ToString();
+                            string stringValue = sourceCell.StringCellValue.ToString();
                             destinationCell.SetCellValue(stringValue);
                         }
                         else
                         {
-                            // Destination cell is empty or contains another data type
+
                             if (sourceCell.CellType == CellType.Numeric)
                             {
                                 // Convert numeric value to double
-                                double numericValue = sourceCell.NumericCellValue;
-                                destinationCell.SetCellValue(numericValue);
+                                try
+                                {
+                                    double numericValue = sourceCell.NumericCellValue;
+                                    destinationCell.SetCellValue(numericValue);
+                                }
+                                catch
+                                {
+                                    destinationCell.SetCellValue(0);
+                                }
+
                             }
                             else if (sourceCell.CellType == CellType.String)
                             {
                                 // Convert string value to double if possible, otherwise set as string
-                                string stringValue = sourceCell.ToString();
+                                string stringValue = sourceCell.StringCellValue.ToString();
                                 if (double.TryParse(stringValue, out double numericValue))
                                 {
                                     destinationCell.SetCellValue(numericValue);
@@ -176,6 +293,10 @@ namespace ExcelApp
                                 {
                                     destinationCell.SetCellValue(stringValue);
                                 }
+                            }
+                            else
+                            {
+                                destinationCell.SetCellValue(0);
                             }
                         }
 
@@ -191,7 +312,7 @@ namespace ExcelApp
                 secondWorkbook.Write(file,false);
             }
 
-            Console.WriteLine("Done!");
+            Console.WriteLine("Operation Completed!");
         }
     }
 
