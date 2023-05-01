@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>rebis-grade-excel-importer</id>
+    <version>1.0.0</version>
+    <authors>ucoruh</authors>
+    <owners>ucoruh</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Rebis Grade Excel Importer is a console application for importing grades from Excel files to Rebis.</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <tags>rebis excel importer grades</tags>
+    <projectUrl>https://github.com/ucoruh/rebis-grade-excel-importer</projectUrl>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+  </metadata>
+  <files>
+    <file src="tools\install.ps1" target="tools\install.ps1" />
+    <file src="windows-binaries.tar.gz" target="" />
+  </files>
+</package>
